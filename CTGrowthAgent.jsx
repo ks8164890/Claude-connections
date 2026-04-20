@@ -135,18 +135,12 @@ ${GROWTH_KB}
 MEME LIBRARY (pick the best match for the user's question mood/topic)
 ${memeIndex || "(empty — skip meme selection)"}
 
-OUTPUT FORMAT — RETURN STRICT JSON ONLY, NO MARKDOWN FENCES:
-{
-  "answer": "<your Hinglish answer here>",
-  "meme_id": "<id of the single best meme, or null if library empty>",
-  "meme_caption": "<short Hinglish caption like 'Yeh le bhai, motivation ke liye 🔥'>"
-}
+Respond directly in Hinglish. No JSON. Just plain text answer ending with TL;DR.
 
 RULES
-- answer must be Hinglish, practical, with numbers, ending with a TL;DR line.
+- Hinglish, practical, with numbers, ending with a TL;DR line.
 - meme_id must exactly match one id from the library above, or be null.
-- caption must be 1 short line, Hinglish vibe.
-- Return ONLY the JSON object. No prose before or after.`;
+- caption must be 1 short line, Hinglish vibe.`;
 }
 
 // ---------- Anthropic API Call ----------
@@ -362,26 +356,15 @@ export default function CTGrowthAgent() {
       }));
 
       const raw = await callClaude({ apiKey, system, messages: apiMessages });
-      let parsed;
-      try {
-        parsed = parseAgentJSON(raw);
-      } catch {
-        parsed = { answer: raw, meme_id: null, meme_caption: "" };
-      }
 
-      const meme = parsed.meme_id
-        ? memeLibrary.find((m) => m.id === parsed.meme_id) || null
-        : null;
+      const meme = null;
+      const caption = "";
 
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: {
-            answer: parsed.answer || "",
-            meme,
-            caption: parsed.meme_caption || "Yeh le bhai 🔥",
-          },
+          content: { answer: raw, meme, caption },
         },
       ]);
     } catch (err) {
